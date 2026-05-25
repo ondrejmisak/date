@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>pôjdeš so mnou na rande? 🌸</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose:   #f43f5e;
+    --blush:  #fda4af;
+    --cream:  #fff7f3;
+    --ink:    #2b1a1a;
+  }
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg, #fff 0%, var(--cream) 100%);
+    overflow-x: hidden;
+  }
+  .display {
+    font-family: 'Caveat', cursive;
+    line-height: 1.05;
+  }
+
+  /* ───── falling flowers ───── */
+  .flowers {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .flowers span {
+    position: absolute;
+    top: -10vh;
+    font-size: 1.6rem;
+    will-change: transform;
+    animation: fall linear infinite;
+    opacity: .85;
+  }
+  @keyframes fall {
+    0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); }
+    100% { transform: translate3d(0, 110vh, 0) rotate(360deg); }
+  }
+
+  /* ───── screens ───── */
+  main { position: relative; z-index: 10; }
+  .screen {
+    display: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 1.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    opacity: 0;
+    transition: opacity .45s ease;
+  }
+  .screen.active { display: flex; opacity: 1; }
+
+  /* ───── buttons ───── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0.95rem 2rem;
+    border-radius: 9999px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    border: 2px solid transparent;
+    box-shadow: 0 6px 0 rgba(0,0,0,.08);
+    transition: transform .15s ease, box-shadow .15s ease, background .2s, color .2s;
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:hover  { transform: translateY(-2px); }
+  .btn:active { transform: translateY(1px); box-shadow: 0 3px 0 rgba(0,0,0,.08); }
+  .btn-yes { background: var(--rose); color: #fff; }
+  .btn-yes:hover { background: #e11d48; }
+  .btn-no  { background: #fff; color: var(--ink); border-color: #e5e7eb; }
+  .btn-ghost { background: #fff; color: var(--ink); border-color: #e5e7eb; }
+  .btn-pill {
+    padding: 0.8rem 1.4rem;
+    border-radius: 9999px;
+    border: 2px solid #f1d5dc;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 4px 0 rgba(0,0,0,.04);
+    font-weight: 600;
+  }
+  .btn-pill:hover { transform: translateY(-2px); border-color: var(--blush); }
+  .btn-pill.selected {
+    background: var(--rose); color: #fff; border-color: var(--rose);
+  }
+  .btn-pill.selected .hint { color: rgba(255,255,255,.85); }
+  .hint { color: #9a6b73; font-size: .85rem; font-weight: 500; }
+
+  .food-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: .75rem; width: 100%; }
+  .food {
+    aspect-ratio: 1/1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .25rem;
+    border-radius: 1.25rem;
+    border: 2px solid #f1d5dc;
+    background: #fff;
+    cursor: pointer;
+    transition: all .15s ease;
+    box-shadow: 0 4px 0 rgba(0,0,0,.04);
+    font-weight: 700;
+  }
+  .food .emoji { font-size: 2.5rem; line-height: 1; }
+  .food:hover { transform: translateY(-3px); border-color: var(--blush); }
+  .food.selected { background: var(--rose); color: #fff; border-color: var(--rose); }
+
+  /* ───── No button when dodging ───── */
+  .runaway {
+    position: fixed !important;
+    transition: top .25s cubic-bezier(.34,1.56,.64,1), left .25s cubic-bezier(.34,1.56,.64,1);
+    z-index: 50;
+  }
+
+  .gif {
+    width: 220px;
+    max-width: 70vw;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(244,63,94,.18);
+    background: #fff;
+  }
+
+  textarea, input[type="date"] {
+    width: 100%;
+    padding: .9rem 1rem;
+    border-radius: 1rem;
+    border: 2px solid #f1d5dc;
+    background: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  textarea:focus, input[type="date"]:focus { border-color: var(--rose); }
+
+  .paws::before { content: '🐾 '; }
+  .paws::after  { content: ' 🐾'; }
+</style>
+</head>
+<body>
+
+<!-- falling flowers backdrop -->
+<div class="flowers" id="flowers" aria-hidden="true"></div>
+
+<main>
+
+<!-- ───────── SCREEN 1: the ask ───────── -->
+<section class="screen active" id="s1">
+  <img class="gif" src="assets/kitty.gif" alt=""
+       onerror="this.outerHTML='<div style=\'font-size:5rem\'>🐾</div>'" />
+  <h1 class="display text-5xl sm:text-6xl text-center" style="color:var(--rose)">
+    Pôjdeš so mnou na rande?
+  </h1>
+  <p class="text-gray-500 text-center max-w-sm">prosím povedz áno, mám trému ako blázon</p>
+  <div class="flex flex-wrap gap-4 justify-center mt-2">
+    <button class="btn btn-yes" id="btnYes">Áno 💕</button>
+    <button class="btn btn-no"  id="btnNo">Nie</button>
+  </div>
+</section>
+
+<!-- ───────── SCREEN 2: reaction ───────── -->
+<section class="screen" id="s2">
+  <img class="gif" src="assets/success.gif" alt=""
+       onerror="this.outerHTML='<div style=\'font-size:5rem\'>🥹🎉</div>'" />
+  <h1 class="display text-5xl text-center" style="color:var(--rose)">
+    počkaj, ty si naozaj povedala áno? 😭
+  </h1>
+  <p class="text-gray-600 text-center max-w-md text-lg">
+    bol som tak pripravený, že povieš nie...
+  </p>
+  <button class="btn btn-yes mt-2" data-next="s3">okej okej →</button>
+</section>
+
+<!-- ───────── SCREEN 3: when ───────── -->
+<section class="screen" id="s3">
+  <h1 class="display text-5xl text-center" style="color:var(--rose)">📅</h1>
+  <h2 class="display text-4xl text-center">takže... kedy si voľná?</h2>
+
+  <div class="w-full max-w-md flex flex-col gap-3 mt-2">
+    <label class="text-sm font-bold text-gray-600 pl-1">Dátum</label>
+    <input type="date" id="dateInput" />
+
+    <label class="text-sm font-bold text-gray-600 pl-1 mt-2">A o koľkej?</label>
+    <button class="btn-pill" data-time="17:00">
+      <div>17:00</div><div class="hint">toto je správna odpoveď ✅</div>
+    </button>
+    <button class="btn-pill" data-time="18:00">
+      <div>18:00</div><div class="hint">fajn, akceptujem</div>
+    </button>
+    <button class="btn-pill" data-time="19:00">
+      <div>19:00</div><div class="hint">hmm... romantické 🌙</div>
+    </button>
+    <button class="btn-pill" data-time="20:00">
+      <div>20:00</div><div class="hint">to ideme na večeru alebo raňajky? 🥐</div>
+    </button>
+  </div>
+
+  <button class="btn btn-yes mt-4" id="toFood" disabled style="opacity:.5">ďalej →</button>
+</section>
+
+<!-- ───────── SCREEN 4: food ───────── -->
+<section class="screen" id="s4">
+  <h1 class="display text-5xl text-center" style="color:var(--rose)">na čo máme chuť?</h1>
+  <p class="text-gray-500 text-center">vyber jednu (alebo dve, nesúdim)</p>
+
+  <div class="food-grid max-w-lg w-full mt-2">
+    <button class="food" data-food="🍕 Pizza"><div class="emoji">🍕</div>Pizza</button>
+    <button class="food" data-food="🍔 Burger"><div class="emoji">🍔</div>Burger</button>
+    <button class="food" data-food="🍝 Pasta"><div class="emoji">🍝</div>Pasta</button>
+    <button class="food" data-food="🥗 Veggie"><div class="emoji">🥗</div>Veggie</button>
+    <button class="food" data-food="☕ Káva"><div class="emoji">☕</div>Káva</button>
+  </div>
+
+  <div class="w-full max-w-lg mt-3">
+    <label class="text-sm font-bold text-gray-600 pl-1">ešte niečo? (nepovinné)</label>
+    <textarea id="noteInput" rows="3" placeholder="napíš mi čokoľvek 🌷"></textarea>
+  </div>
+
+  <!-- honeypot: real users never see/fill this; bots auto-fill everything -->
+  <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+    <label>Website (leave empty)
+      <input type="text" id="hp_website" name="website" tabindex="-1" autocomplete="off" />
+    </label>
+  </div>
+
+  <!-- Google Form binding: submission goes via fetch + URLSearchParams + no-cors
+       below. These constants are read at submit time. -->
+  <script>
+    const GFORM = {
+      action: 'https://docs.google.com/forms/d/e/1FAIpQLScH7uM5DTjTxWNfMrQhaekt4jSRcBjaNdjs7wzZF_zPUitxUA/formResponse',
+      date:   'entry.1804766827',
+      time:   'entry.133702288',
+      food:   'entry.587129346',
+      note:   'entry.1300349229',
+    };
+  </script>
+
+  <button class="btn btn-yes mt-2" id="submitBtn" disabled style="opacity:.5">odoslať 💌</button>
+</section>
+
+<!-- ───────── SCREEN 5: confirmation ───────── -->
+<section class="screen" id="s5">
+  <img class="gif" src="assets/coming.gif" alt=""
+       onerror="this.outerHTML='<div style=\'font-size:5rem\'>🚗💨</div>'" />
+  <h1 class="display text-5xl text-center" style="color:var(--rose)">
+    som rád, že si nepovedala nie 😌
+  </h1>
+  <p class="text-2xl text-center font-bold">
+    priprav sa o <span id="confirmTime" style="color:var(--rose)">—</span> —
+    idem si po teba 🚗💨
+  </p>
+  <p class="text-gray-500 text-center max-w-sm text-sm mt-4">
+    ps: normálni ľudia sa rozprávajú... ale toto je krajšie, nie? 🌷
+  </p>
+</section>
+
+</main>
+
+<script>
+  // ───────── state ─────────
+  var submitted = false;
+  const state = { date: '', time: '', food: '', note: '' };
+
+  // ───────── screen switching ─────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    el.classList.add('active');
+    window.scrollTo({ top: 0 });
+  }
+  document.querySelectorAll('[data-next]').forEach(b => {
+    b.addEventListener('click', () => showScreen(b.dataset.next));
+  });
+
+  // ───────── falling flowers ─────────
+  (function spawnFlowers() {
+    const emojis = ['🌸','🌷','🌹','🌺','🌻','💐','🌼'];
+    const root = document.getElementById('flowers');
+    const N = 28;
+    for (let i = 0; i < N; i++) {
+      const span = document.createElement('span');
+      span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      span.style.left            = Math.random() * 100 + 'vw';
+      span.style.animationDuration = (6 + Math.random() * 8) + 's';
+      span.style.animationDelay    = (-Math.random() * 14) + 's';
+      span.style.fontSize          = (1.1 + Math.random() * 1.4) + 'rem';
+      root.appendChild(span);
+    }
+  })();
+
+  // ───────── No button: dodge ─────────
+  (function noDodge() {
+    const btn = document.getElementById('btnNo');
+    function dodge() {
+      const pad = 16;
+      const w = btn.offsetWidth, h = btn.offsetHeight;
+      const maxX = window.innerWidth  - w - pad;
+      const maxY = window.innerHeight - h - pad;
+      const x = Math.max(pad, Math.floor(Math.random() * maxX));
+      const y = Math.max(pad, Math.floor(Math.random() * maxY));
+      btn.classList.add('runaway');
+      btn.style.left = x + 'px';
+      btn.style.top  = y + 'px';
+    }
+    btn.addEventListener('mouseenter', dodge);
+    btn.addEventListener('mouseover',  dodge);   // belt + suspenders
+    btn.addEventListener('focus',      dodge);
+    btn.addEventListener('touchstart', e => { e.preventDefault(); dodge(); }, { passive: false });
+    btn.addEventListener('click',      dodge);   // if they somehow land it
+  })();
+
+  // ───────── Yes button ─────────
+  document.getElementById('btnYes').addEventListener('click', () => showScreen('s2'));
+
+  // ───────── Date input default = today ─────────
+  (function() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    const inp = document.getElementById('dateInput');
+    inp.value = todayStr;
+    inp.min = todayStr;
+    state.date = todayStr;
+    inp.addEventListener('change', e => {
+      state.date = e.target.value;
+      refreshContinue();
+    });
+  })();
+
+  // ───────── Time selection ─────────
+  document.querySelectorAll('[data-time]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-time]').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      state.time = b.dataset.time;
+      refreshContinue();
+    });
+  });
+
+  function refreshContinue() {
+    const ok = state.date && state.time;
+    const btn = document.getElementById('toFood');
+    btn.disabled = !ok;
+    btn.style.opacity = ok ? '1' : '.5';
+  }
+  document.getElementById('toFood').addEventListener('click', () => {
+    if (state.date && state.time) showScreen('s4');
+  });
+
+  // ───────── Food selection ─────────
+  document.querySelectorAll('[data-food]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-food]').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      state.food = b.dataset.food;
+      refreshSubmit();
+    });
+  });
+  document.getElementById('noteInput').addEventListener('input', e => {
+    state.note = e.target.value;
+  });
+
+  function refreshSubmit() {
+    const ok = !!state.food;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = !ok;
+    btn.style.opacity = ok ? '1' : '.5';
+  }
+
+  // ───────── Submit to Google Forms via fetch + no-cors ─────────
+  // We can't read the response (opaque) but Google reliably stores the row.
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    if (!state.food) return;
+
+    // honeypot: if filled, it's a bot — fake success silently
+    if (document.getElementById('hp_website').value) {
+      document.getElementById('confirmTime').textContent = state.time;
+      showScreen('s5');
+      return;
+    }
+
+    const body = new URLSearchParams();
+    body.append(GFORM.date, state.date);
+    body.append(GFORM.time, state.time);
+    body.append(GFORM.food, state.food);
+    body.append(GFORM.note, state.note || '(nič)');
+
+    document.getElementById('confirmTime').textContent = state.time;
+
+    fetch(GFORM.action, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    }).finally(() => showScreen('s5'));
+  });
+</script>
+</body>
+</html>
